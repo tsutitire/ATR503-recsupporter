@@ -281,7 +281,7 @@ Static13.place(x=450, y=330)
 Static14 = tk.Label(text="書き込み先フォルダを選択してください", font=("",10), bg="#d3d3d3",width = 50)
 Static14.place(x=30, y=330)
 
-
+root.iconbitmap('./icon.ico')
 root.mainloop()
 if stream.is_active():
     stream.stop_stream()

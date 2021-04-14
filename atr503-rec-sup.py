@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat Feb 27 06:50:27 2021
-
 @author: tsutitire
-
 https://ai-trend.jp/programming/python/voice-record/
-
-
 """
 import sys
 import tkinter as tk
 from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
 import pyaudio 
 import wave     
 import numpy as np
@@ -32,28 +29,34 @@ settendev = 0
 iferr = 0
 
 def starting(fr,stream):
-    global data
-    
-    Static6["text"] = "録音を開始しました"
-    '''
-    count = 0
-    while stream.is_active():
-        frame = stream.read(fr)
-        data.append(frame)
-        count = count + 1
-        if count >= 1000:
-            break
-    '''
-    frame.after_idle(update)
+    try:
+        global data
+        
+        Static6["text"] = "録音を開始しました"
+        '''
+        count = 0
+        while stream.is_active():
+            frame = stream.read(fr)
+            data.append(frame)
+            count = count + 1
+            if count >= 1000:
+                break
+        '''
+        frame.after_idle(update)
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
 
 def update():
-    global data,fr,stream
-    if stream and stream.is_active():
-        frames = stream.read(fr)
-        data.append(frames)
-        #print(data)
-        if iferr == 0:
-            frame.after(1, update)
+    try:
+        global data,fr,stream
+        if stream and stream.is_active():
+            frames = stream.read(fr)
+            data.append(frames)
+            #print(data)
+            if iferr == 0:
+                frame.after(1, update)
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
 
 def closing(filename,channel,rformat,rate,stream,pa,data):
     stream.stop_stream()
@@ -78,132 +81,155 @@ def closing(filename,channel,rformat,rate,stream,pa,data):
 
 
 def button1_click():
-    global isrec,settendev,stream,fr,iferr
-    Static1["state"] = "disabled"
-    Static2["state"] = "active"
-    Static2["fg"] = "#b22222"
-    isrec = True
-    filename = "testing"
-    filename = "./" + filename + ".wav"
-    #setting
-    rformat = pyaudio.paInt16 
-    channel = 1
-    rate = 48000
-    iferr = 0
-    fr = 2**10 #1024
     try:
-        stream = pa.open(format=rformat, channels=channel, rate=rate,
-                         input=True, input_device_index=settendev, frames_per_buffer=fr)
-    except OSError as e:
-        if str(e).find("-9998") != -1:
-            Static6["text"] = "端末不正、マイクではないデバイスを選択していないか確認してください"
-        if str(e).find("-9999") != -1:
-            Static6["text"] = "アクセス不可、他のアプリの使用または権限を確かめてください"
-        Static15["bg"] = "#ff0000"
-        iferr = 1
-
-    try:
-        stream
+        global isrec,settendev,stream,fr,iferr
+        Static1["state"] = "disabled"
+        Static2["state"] = "active"
+        Static2["fg"] = "#b22222"
+        isrec = True
+        filename = "testing"
+        filename = "./" + filename + ".wav"
+        #setting
+        rformat = pyaudio.paInt16 
+        channel = 1
+        rate = 48000
+        iferr = 0
+        fr = 2**10 #1024
+        try:
+            stream = pa.open(format=rformat, channels=channel, rate=rate,
+                             input=True, input_device_index=settendev, frames_per_buffer=fr)
+        except OSError as e:
+            if str(e).find("-9998") != -1:
+                Static6["text"] = "端末不正、マイクではないデバイスを選択していないか確認してください"
+            if str(e).find("-9999") != -1:
+                Static6["text"] = "アクセス不可、他のアプリの使用または権限を確かめてください"
+            Static15["bg"] = "#ff0000"
+            iferr = 1
+    
+        try:
+            stream
+        except:
+            return
+        Static15["bg"] = "#ff8c00"
+            
+        starting(fr,stream)
     except:
-        return
-    Static15["bg"] = "#ff8c00"
-        
-    starting(fr,stream)
+        messagebox.showerror("やべーぞ", traceback.format_exc())
     
 def button2_click():
-    global isrec,data,a_list
-    isrec = False
-    getfilen = Static8["text"]
-    getfilei = getfilen.split(" : ")
-    filename = getfilei[0]
-    filename = Static14["text"] + "/" + filename + ".wav"
-    #setting
-    rformat = pyaudio.paInt16 
-    channel = 1
-    rate = 48000
     try:
-        stream
-    except:
+        global isrec,data,a_list
+        isrec = False
+        getfilen = Static8["text"]
+        getfilei = getfilen.split(" : ")
+        filename = getfilei[0]
+        filename = Static14["text"] + "/" + filename + ".wav"
+        #setting
+        rformat = pyaudio.paInt16 
+        channel = 1
+        rate = 48000
+        try:
+            stream
+        except:
+            Static1["state"] = "active"
+            Static2["state"] = "disabled"
+            Static1["fg"] = "#32cd32"
+            return
+        closing(filename, channel, rformat, rate, stream, pa, data)
+        data = []
+        
         Static1["state"] = "active"
         Static2["state"] = "disabled"
         Static1["fg"] = "#32cd32"
-        return
-    closing(filename, channel, rformat, rate, stream, pa, data)
-    
-    Static1["state"] = "active"
-    Static2["state"] = "disabled"
-    Static1["fg"] = "#32cd32"
-   
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
     
 def button3_click():
-    iAudio = pyaudio.PyAudio()
-    audios = []
-    for x in range(0, iAudio.get_device_count()): 
-        audios.append(iAudio.get_device_info_by_index(x).get("name"))
-    Static3.delete(0,'end')
-    Static3.delete(0,'end')
-    Static3.delete(0,'end')
-    for item in audios:
-        Static3.insert(tk.END, item)
+    try:
+        iAudio = pyaudio.PyAudio()
+        audios = []
+        for x in range(0, iAudio.get_device_count()): 
+            audios.append(iAudio.get_device_info_by_index(x).get("name"))
+        Static3.delete(0,'end')
+        Static3.delete(0,'end')
+        Static3.delete(0,'end')
+        for item in audios:
+            Static3.insert(tk.END, item)
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
         
 def button4_click():
-    global a_list
-    file_path = Static11["text"]
-    csv_file = open(file_path,'r')
-    
-    a_list = [[]]
-    
-    for row in csv.reader(csv_file):
-        b_list = row
-        a_list.append(b_list)  
-    a_list.pop(0)
-    
-    Static12.delete(0,"end")
-    Static12.delete(0,"end")
-    Static12.delete(0,"end")
-    
-    Static7.delete(0,"end")
-    Static7.delete(0,"end")
-    Static7.delete(0,"end")
-    
-    for i in a_list[0]:
-        c_list = i.split(" : ")
-        Static12.insert(tk.END, c_list[0])
-    
+    try:
+        global a_list
+        file_path = Static11["text"]
+        csv_file = open(file_path,'r')
+        
+        a_list = [[]]
+        
+        for row in csv.reader(csv_file):
+            b_list = row
+            a_list.append(b_list)  
+        a_list.pop(0)
+        
+        Static12.delete(0,"end")
+        Static12.delete(0,"end")
+        Static12.delete(0,"end")
+        
+        Static7.delete(0,"end")
+        Static7.delete(0,"end")
+        Static7.delete(0,"end")
+        
+        for i in a_list[0]:
+            c_list = i.split(" : ")
+            Static12.insert(tk.END, c_list[0])
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
     
     
 def button5_click():
-    file_path = filedialog.askopenfilename(filetypes = [('CSV(カンマ区切り)ファイル', '*.csv')])
-    Static11["text"] = ""
-    Static11["text"] = file_path  
-    
+    try:
+        file_path = filedialog.askopenfilename(filetypes = [('CSV(カンマ区切り)ファイル', '*.csv')])
+        Static11["text"] = ""
+        Static11["text"] = file_path  
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
 def button6_click():
-    file_path = tk.filedialog.askdirectory(initialdir = os.getcwd())
-    Static14["text"] = ""
-    Static14["text"] = file_path  
-    
+    try:
+        file_path = tk.filedialog.askdirectory(initialdir = os.getcwd())
+        Static14["text"] = ""
+        Static14["text"] = file_path  
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
 
 def listbox1_select(event):
-    global settendev
-    Static5["text"] = audios[int(Static3.curselection()[0])]
-    settendev = int(Static3.curselection()[0])
+    try:
+        global settendev
+        Static5["text"] = audios[int(Static3.curselection()[0])]
+        settendev = int(Static3.curselection()[0])
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
     
 def listbox2_select(event):
-    global a_list,settendev2
-    settendev2 = int(Static12.curselection()[0])
-    
-    Static7.delete(0,"end")
-    Static7.delete(0,"end")
-    Static7.delete(0,"end")
-    
-    for i in a_list:
-        Static7.insert(tk.END, i[settendev2])
-    
+    try:
+        global a_list,settendev2
+        settendev2 = int(Static12.curselection()[0])
+        
+        Static7.delete(0,"end")
+        Static7.delete(0,"end")
+        Static7.delete(0,"end")
+        
+        for i in a_list:
+            Static7.insert(tk.END, i[settendev2])
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
+        
 def listbox3_select(event):
-    global a_list
-    settendev3 = int(Static7.curselection()[0])
-    Static8["text"] = a_list[settendev3][settendev2]
-    
+    try:
+        global a_list
+        settendev3 = int(Static7.curselection()[0])
+        Static8["text"] = a_list[settendev3][settendev2]
+    except:
+        messagebox.showerror("やべーぞ", traceback.format_exc())
     
 root = tk.Tk()
 frame = tk.Frame(root)
@@ -287,5 +313,3 @@ if stream.is_active():
     stream.stop_stream()
     stream.close()
     pa.terminate()
-    
-    

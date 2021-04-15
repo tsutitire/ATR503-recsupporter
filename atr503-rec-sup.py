@@ -16,6 +16,7 @@ import numpy as np
 import threading
 import csv
 import os
+import traceback
 
 
 audios = []
@@ -58,7 +59,8 @@ def update():
     except:
         messagebox.showerror("やべーぞ", traceback.format_exc())
 
-def closing(filename,channel,rformat,rate,stream,pa,data):
+def closing(filename,channel,rformat,rate,stream,pa):
+    global data
     stream.stop_stream()
     stream.close()
     pa.terminate()
@@ -135,7 +137,7 @@ def button2_click():
             Static2["state"] = "disabled"
             Static1["fg"] = "#32cd32"
             return
-        closing(filename, channel, rformat, rate, stream, pa, data)
+        closing(filename, channel, rformat, rate, stream, pa)
         data = []
         
         Static1["state"] = "active"
